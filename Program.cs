@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using AgendaApp.Data;
 using AgendaApp.Models;
 using AgendaApp.ViewModels;
@@ -10,12 +9,16 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
+#region Pets
 
 app.MapGet("/pets", async (AppDbContext conexao) => Results.Ok(await conexao.Pets.ToArrayAsync()));
 
-app.MapGet("/pets/{id}", (int id, AppDbContext conexao) =>
+app.MapGet("/pets/{id}", async (int id, AppDbContext conexao) =>
 {
-    Pet? pet = conexao.Pets.Find(id);
+    Pet? pet = await conexao.Pets.Where(x => x.Id == id)
+                                 .Include(p => p.Cliente)
+                                 .FirstOrDefaultAsync();
+
     return pet is not null ? Results.Ok(pet) : Results.NotFound(pet);
 });
 
@@ -30,7 +33,8 @@ app.MapPost("/pets/create", async (AppDbContext conexao, PetViewModel model) =>
     Pet pet = new Pet
     {
         Nome = model.Nome,
-        dtInclusao = DateTime.Now
+        ClienteId = model.ClienteId,
+        DtInclusao = DateTime.Now
     };
 
     await conexao.Pets.AddAsync(pet);
@@ -41,14 +45,13 @@ app.MapPost("/pets/create", async (AppDbContext conexao, PetViewModel model) =>
 app.MapPut("/pets/update", async (AppDbContext conexao, PetViewModel model) =>
 {
     model.Update();
-    if (!model.IsValid)
-        return Results.BadRequest(model.Notifications);
-
-    if (conexao.Pets.Find(model.Id) is Pet pet)
+    if (!model.IsValid) return Results.BadRequest(model.Notifications);
+    else if (await conexao.Pets.FindAsync(model.Id) is Pet pet &&
+        await conexao.Clientes.FindAsync(pet.ClienteId) is not null)
     {
         pet.Nome = model.Nome;
-        pet.dtInclusao = model.dtInclusao;
-        pet.dtUltVisita = model.dtUltVisita;
+        pet.DtInclusao = model.DtInclusao;
+        pet.ClienteId = model.ClienteId;
 
         conexao.Pets.Update(pet);
         await conexao.SaveChangesAsync();
@@ -58,5 +61,12 @@ app.MapPut("/pets/update", async (AppDbContext conexao, PetViewModel model) =>
 
 });
 
+#endregion
+
+#region Cliente
+
+
+
+#endregion
 
 app.Run();
