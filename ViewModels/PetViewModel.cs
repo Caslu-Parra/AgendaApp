@@ -17,7 +17,6 @@ namespace AgendaApp.ViewModels
             }
         }
         protected virtual void Consiste() { }
-
     }
 
     public class CreatePetViewModel : PetViewModel

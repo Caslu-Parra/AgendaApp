@@ -11,7 +11,6 @@ namespace AgendaApp.Models
         public string CPF { get; set; }
         public DateTime DtInclusao { get; set; }
         public string Nome { get; set; }
-        public int PetId { get; set; }
         public ICollection<Pet> Pets { get; set; }
     }
 }

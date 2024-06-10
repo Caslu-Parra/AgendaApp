@@ -92,37 +92,44 @@ app.MapPost("/clientes/create", async (AppDbContext db, CreateClienteViewModel m
 {
     if (!model.IsValid)
         return Results.BadRequest(model);
-    else if (db.Clientes.Any(e => e.CPF == model.CPF))
-        return Results.Conflict(model);
 
     Cliente cliente = new()
     {
         Nome = model.Nome,
         CPF = model.CPF,
-        PetId = model.PetId,
         DtInclusao = DateTime.Now
     };
-    await db.Clientes.AddAsync(cliente);
-    await db.SaveChangesAsync();
-    return Results.Created(string.Empty, cliente);
+    try
+    {
+        await db.Clientes.AddAsync(cliente);
+        await db.SaveChangesAsync();
+        return Results.Created(string.Empty, cliente);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message, ex.InnerException.Message, 500);
+    }
 });
 
 app.MapPut("/clientes/update", async (AppDbContext db, UpdateClienteViewModel model) =>
 {
     if (!model.IsValid) return Results.BadRequest(model);
-    else if (await db.Clientes.FindAsync(model.Id) is Cliente cliente &&
-             await db.Pets.FindAsync(cliente.PetId) is not null)
+    try
     {
+        Cliente? cliente = await db.Clientes.FindAsync(model.Id);
+        if (cliente is null) return Results.NotFound(model);
+
         cliente.CPF = model.CPF;
         cliente.Nome = model.Nome;
-        cliente.DtInclusao = model.DtInclusao;
-        cliente.PetId = model.PetId;
 
         db.Clientes.Update(cliente);
         await db.SaveChangesAsync();
         return Results.Ok(cliente);
     }
-    else return Results.NotFound(model);
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message, ex.InnerException.Message, 500);
+    }
 });
 
 #endregion
