@@ -16,26 +16,22 @@ namespace AgendaApp.ViewModels
                 return base.IsValid;
             }
         }
-        protected virtual void Consiste() { }
-    }
-
-    public class CreatePetViewModel : PetViewModel
-    {
-        protected override void Consiste() => AddNotifications(new Contract<Notification>()
+        protected virtual void Consiste() => AddNotifications(new Contract<Notification>()
                                               .Requires()
                                               .IsNotNullOrEmpty(Nome, "Nome", "Campo obrigatório")
+                                              .IsGreaterOrEqualsThan(Nome, 3, "Nome", "Campo deve conter pelo menos 3 caracteres")
                                               .IsNotNull(ClienteId, "ClienteCPF", "Campo obrigatório"));
     }
+
+    public class CreatePetViewModel : PetViewModel;
 
     public class UpdatePetViewModel : PetViewModel
     {
         public int Id { get; set; }
-        public DateTime DtInclusao { get; set; }
-        protected override void Consiste() => AddNotifications(new Contract<Notification>()
-                                              .Requires()
-                                              .IsNotNull(Id, "Id", "Campo obrigatório")
-                                              .IsNotNull(ClienteId, "ClienteCPF", "Campo obrigatório")
-                                              .IsNotNullOrEmpty(Nome, "Nome", "Campo obrigatório")
-                                              .IsNull(DtInclusao, "DtInclusao", "Campo obrigatório"));
+        protected override void Consiste() {
+            base.Consiste();
+            AddNotifications(new Contract<Notification>().Requires()
+                                                         .IsNotNull(Id, "Id", "Campo obrigatório"));
+        }
     }
 }

@@ -31,7 +31,8 @@ namespace AgendaApp.ViewModels
         protected override void Consiste()
         {
             base.Consiste();
-            AddNotifications(new Contract<Notification>().IsNotNull(Id, "PetId", "Campo obrigatório"));
+            AddNotifications(new Contract<Notification>().Requires()
+                                                         .IsNotNull(Id, "PetId", "Campo obrigatório"));
         }
     };
 }

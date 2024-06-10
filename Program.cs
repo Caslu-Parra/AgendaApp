@@ -31,19 +31,15 @@ app.MapGet("/pets/{id}", async (int id, AppDbContext db) =>
 
 app.MapPost("/pets/create", async (AppDbContext db, CreatePetViewModel model) =>
 {
-    if (!model.IsValid)
-        return Results.BadRequest(model.Notifications);
-    else if (db.Pets.Any(t => t.Nome == model.Nome))
-        return Results.Conflict("Nome já existente");
-
-    Pet pet = new Pet
-    {
-        Nome = model.Nome,
-        ClienteId = model.ClienteId,
-        DtInclusao = DateTime.Now
-    };
+    if (!model.IsValid) return Results.BadRequest(model.Notifications);
     try
     {
+        Pet pet = new Pet
+        {
+            Nome = model.Nome,
+            ClienteId = model.ClienteId,
+            DtInclusao = DateTime.Now
+        };
         await db.Pets.AddAsync(pet);
         await db.SaveChangesAsync();
         return Results.Created(string.Empty, pet);
@@ -54,19 +50,19 @@ app.MapPost("/pets/create", async (AppDbContext db, CreatePetViewModel model) =>
 app.MapPut("/pets/update", async (AppDbContext db, UpdatePetViewModel model) =>
 {
     if (!model.IsValid) return Results.BadRequest(model.Notifications);
-    else if (await db.Pets.FindAsync(model.Id) is Pet pet &&
-        await db.Clientes.FindAsync(pet.ClienteId) is not null)
+    try
     {
+        Pet? pet = await db.Pets.FindAsync(model.Id);
+        if (pet is null) return Results.NotFound(model);
+
         pet.Nome = model.Nome;
-        pet.DtInclusao = model.DtInclusao;
         pet.ClienteId = model.ClienteId;
 
         db.Pets.Update(pet);
         await db.SaveChangesAsync();
         return Results.Ok(pet);
     }
-    else return Results.NotFound(model);
-
+    catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
 });
 
 #endregion
@@ -126,10 +122,7 @@ app.MapPut("/clientes/update", async (AppDbContext db, UpdateClienteViewModel mo
         await db.SaveChangesAsync();
         return Results.Ok(cliente);
     }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message, ex.InnerException.Message, 500);
-    }
+    catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
 });
 
 #endregion
