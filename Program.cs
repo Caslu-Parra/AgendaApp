@@ -1,130 +1,32 @@
 using System.Text.Json.Serialization;
 using AgendaApp.Data;
 using AgendaApp.Models;
+using AgendaApp.Routes;
 using AgendaApp.ViewModels;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.Configure<JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddDbContext<AppDbContext>()
+                .Configure<JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
+                .AddEndpointsApiExplorer()
+                .AddSwaggerGen();
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
-
-#region Pets
-
-app.MapGet("/pets", async (AppDbContext db) =>
+if (app.Environment.IsDevelopment())
 {
-    Pet[] pets = await db.Pets.ToArrayAsync();
-    return pets.Any() ? Results.Ok(pets) : Results.NoContent();
-});
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.MapGet("/pets/{id}", async (int id, AppDbContext db) =>
-{
-    Pet? pet = await db.Pets.Where(e => e.Id == id)
-                            .Include(e => e.Cliente)
-                            .FirstOrDefaultAsync();
-    return pet is not null ? Results.Ok(pet) : Results.NotFound(pet);
-});
+app.MapGroup("/pets")
+   .WithTags("Pets")
+   .MapPetEndPoints();
 
-app.MapPost("/pets/create", async (AppDbContext db, CreatePetViewModel model) =>
-{
-    if (!model.IsValid) return Results.BadRequest(model.Notifications);
-    try
-    {
-        Pet pet = new Pet
-        {
-            Nome = model.Nome,
-            ClienteId = model.ClienteId,
-            DtInclusao = DateTime.Now
-        };
-        await db.Pets.AddAsync(pet);
-        await db.SaveChangesAsync();
-        return Results.Created(string.Empty, pet);
-    }
-    catch (DbUpdateException ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
-});
-
-app.MapPut("/pets/update", async (AppDbContext db, UpdatePetViewModel model) =>
-{
-    if (!model.IsValid) return Results.BadRequest(model.Notifications);
-    try
-    {
-        Pet? pet = await db.Pets.FindAsync(model.Id);
-        if (pet is null) return Results.NotFound(model);
-
-        pet.Nome = model.Nome;
-        pet.ClienteId = model.ClienteId;
-
-        db.Pets.Update(pet);
-        await db.SaveChangesAsync();
-        return Results.Ok(pet);
-    }
-    catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
-});
-
-#endregion
-
-#region Cliente
-
-app.MapGet("/clientes", async (AppDbContext db) =>
-{
-    Cliente[] clientes = await db.Clientes.ToArrayAsync();
-    return clientes.Any() ? Results.Ok(clientes) : Results.NoContent();
-});
-
-app.MapGet("/clientes/{id}", async (AppDbContext db, int id) =>
-{
-    Cliente? cliente = await db.Clientes.Where(e => e.Id == id)
-                                        .Include(e => e.Pets)
-                                        .FirstOrDefaultAsync();
-    return cliente is not null ? Results.Ok(cliente) : Results.NotFound(cliente);
-
-});
-
-app.MapPost("/clientes/create", async (AppDbContext db, CreateClienteViewModel model) =>
-{
-    if (!model.IsValid)
-        return Results.BadRequest(model);
-
-    Cliente cliente = new()
-    {
-        Nome = model.Nome,
-        CPF = model.CPF,
-        DtInclusao = DateTime.Now
-    };
-    try
-    {
-        await db.Clientes.AddAsync(cliente);
-        await db.SaveChangesAsync();
-        return Results.Created(string.Empty, cliente);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message, ex.InnerException.Message, 500);
-    }
-});
-
-app.MapPut("/clientes/update", async (AppDbContext db, UpdateClienteViewModel model) =>
-{
-    if (!model.IsValid) return Results.BadRequest(model);
-    try
-    {
-        Cliente? cliente = await db.Clientes.FindAsync(model.Id);
-        if (cliente is null) return Results.NotFound(model);
-
-        cliente.CPF = model.CPF;
-        cliente.Nome = model.Nome;
-
-        db.Clientes.Update(cliente);
-        await db.SaveChangesAsync();
-        return Results.Ok(cliente);
-    }
-    catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
-});
-
-#endregion
+app.MapGroup("/clientes")
+   .WithTags("clientes")
+   .MapClienteEndPoints();
 
 app.Run();
