@@ -1,10 +1,7 @@
 using System.Text.Json.Serialization;
 using AgendaApp.Data;
-using AgendaApp.Models;
 using AgendaApp.Routes;
-using AgendaApp.ViewModels;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +23,11 @@ app.MapGroup("/pets")
    .MapPetEndPoints();
 
 app.MapGroup("/clientes")
-   .WithTags("clientes")
+   .WithTags("Clientes")
    .MapClienteEndPoints();
+
+app.MapGroup("/medicos")
+   .WithTags("Medicos")
+   .MapMedicoEndPoints();
 
 app.Run();
