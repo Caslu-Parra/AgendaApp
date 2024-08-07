@@ -40,11 +40,11 @@ namespace AgendaApp.Routes
                     await db.Medicos.AddAsync(medico);
                     await db.SaveChangesAsync();
 
-                    return Results.Created($"{medico.Id}", medico);
+                    return Results.Created();
                 }
                 catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
             })
-            .Produces<Medico>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
@@ -62,16 +62,16 @@ namespace AgendaApp.Routes
 
                     db.Medicos.Update(medico);
                     await db.SaveChangesAsync();
-                    return Results.Accepted($"{medico.Id}", medico);
+                    return Results.Accepted();
                 }
                 catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
             })
-            .Produces<Medico>(StatusCodes.Status202Accepted)
+            .Produces(StatusCodes.Status202Accepted)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
-            app.MapGet("delete/{id}", async (int id, AppDbContext db) =>
+            app.MapDelete("delete/{id}", async (int id, AppDbContext db) =>
             {
                 try
                 {
@@ -80,11 +80,11 @@ namespace AgendaApp.Routes
 
                     db.Medicos.Remove(medico);
                     await db.SaveChangesAsync();
-                    return Results.Ok();
+                    return Results.NoContent();
                 }
                 catch (Exception ex) { return Results.Problem(ex.Message, ex.InnerException.Message, 500); }
             })
-            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
         }
     }

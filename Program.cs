@@ -14,8 +14,12 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+   app.UseSwagger();
+   app.UseSwaggerUI(c =>
+   {
+      c.DefaultModelsExpandDepth(-1); // Disable swagger schemas at bottom
+      c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1");
+   });
 }
 
 app.MapGroup("/pets")
@@ -29,5 +33,9 @@ app.MapGroup("/clientes")
 app.MapGroup("/medicos")
    .WithTags("Medicos")
    .MapMedicoEndPoints();
+
+app.MapGroup("/consultas")
+   .WithTags("Consultas")
+   .MapConsultaRoutes();
 
 app.Run();

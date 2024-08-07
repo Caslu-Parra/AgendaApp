@@ -43,7 +43,7 @@ namespace AgendaApp.Migrations
 
                     b.HasIndex("IdMedicoResp");
 
-                    b.ToTable("Atendimentos");
+                    b.ToTable("Atendimentos", (string)null);
                 });
 
             modelBuilder.Entity("AgendaApp.Models.Cliente", b =>
@@ -68,7 +68,7 @@ namespace AgendaApp.Migrations
                     b.HasIndex("CPF")
                         .IsUnique();
 
-                    b.ToTable("Clientes");
+                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("AgendaApp.Models.Consulta", b =>
@@ -95,7 +95,7 @@ namespace AgendaApp.Migrations
 
                     b.HasIndex("IdPet");
 
-                    b.ToTable("Consultas");
+                    b.ToTable("Consultas", (string)null);
                 });
 
             modelBuilder.Entity("AgendaApp.Models.Medico", b =>
@@ -127,7 +127,7 @@ namespace AgendaApp.Migrations
                     b.HasIndex("CRM")
                         .IsUnique();
 
-                    b.ToTable("Medicos");
+                    b.ToTable("Medicos", (string)null);
                 });
 
             modelBuilder.Entity("AgendaApp.Models.Pet", b =>
@@ -150,7 +150,7 @@ namespace AgendaApp.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Pets");
+                    b.ToTable("Pets", (string)null);
                 });
 
             modelBuilder.Entity("AgendaApp.Models.Atendimento", b =>
