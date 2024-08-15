@@ -37,5 +37,9 @@ app.MapGroup("/medicos")
 app.MapGroup("/consultas")
    .WithTags("Consultas")
    .MapConsultaRoutes();
+   
+app.MapGroup("/atendimento")
+   .WithTags("Atendimentos")
+   .MapAtendimentoRoutes();
 
 app.Run();
