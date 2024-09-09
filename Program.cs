@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using AgendaApp.Data;
+using AgendaApp.Extensions;
 using AgendaApp.Routes;
 using Microsoft.AspNetCore.Http.Json;
 
@@ -22,24 +23,6 @@ if (app.Environment.IsDevelopment())
    });
 }
 
-app.MapGroup("/pets")
-   .WithTags("Pets")
-   .MapPetEndPoints();
-
-app.MapGroup("/clientes")
-   .WithTags("Clientes")
-   .MapClienteEndPoints();
-
-app.MapGroup("/medicos")
-   .WithTags("Medicos")
-   .MapMedicoEndPoints();
-
-app.MapGroup("/consultas")
-   .WithTags("Consultas")
-   .MapConsultaRoutes();
-   
-app.MapGroup("/atendimento")
-   .WithTags("Atendimentos")
-   .MapAtendimentoRoutes();
+app.MapEndpoints();
 
 app.Run();

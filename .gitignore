@@ -1,5 +1,5 @@
 obj/
 bin/
 .vscode/
-.vs/
+/.vs/
 app.bd*
